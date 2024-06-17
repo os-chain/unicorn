@@ -125,16 +125,14 @@ fn buildExe(b: *std.Build, info: BuildInfo) *std.Build.Step.Compile {
             .name = info.filename(),
             .target = info.target,
             .optimize = info.optimize,
-            .root_source_file = .{
-                .path = info.filepath,
-            },
+            .root_source_file = b.path(info.filepath),
         },
     };
     const exe = b.addExecutable(execonfig);
 
     if (info.filetype != .zig) {
         exe.addCSourceFile(.{
-            .file = .{ .path = info.filepath },
+            .file = b.path(info.filepath),
             .flags = &.{
                 "-Wall",
                 "-Werror",
@@ -144,10 +142,10 @@ fn buildExe(b: *std.Build, info: BuildInfo) *std.Build.Step.Compile {
         });
 
         // Ensure the C headers are available
-        exe.addIncludePath(.{ .path = "include" });
+        exe.addIncludePath(b.path("include"));
 
         // Ensure the C library is available
-        exe.addLibraryPath(.{ .path = "build" });
+        exe.addLibraryPath(b.path("build"));
 
         // linking to OS-LibC or static-linking for:
         // Musl(Linux) [e.g: -Dtarget=native-linux-musl]
